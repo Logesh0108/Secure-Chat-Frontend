@@ -1,0 +1,35 @@
+:root {
+  --bg-black: #0b0b0b;
+  --text-white: #ffffff;
+  --accent-orange: #ff9800;
+  --accent-yellow: #ffd54f;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-black);
+  color: var(--text-white);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+button {
+  background: var(--accent-orange);
+  color: black;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: var(--accent-yellow);
+}
+
+input {
+  background: #121212;
+  color: white;
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 6px;
+}
