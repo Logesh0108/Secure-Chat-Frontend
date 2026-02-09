@@ -6,16 +6,24 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Backend URL from environment variable
+  const API_BASE = process.env.REACT_APP_API_URL;
+
   async function sendOtp() {
     if (!email) {
       alert("Please enter your email");
       return;
     }
 
+    if (!API_BASE) {
+      alert("Backend URL not configured");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/send-otp", {
+      const res = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -25,7 +33,6 @@ export default function Login() {
 
       if (!res.ok) {
         alert(data.detail || "Failed to send OTP");
-        setLoading(false);
         return;
       }
 
@@ -34,12 +41,12 @@ export default function Login() {
       navigate("/verify");
 
     } catch (error) {
+      console.error(error);
       alert("Server not reachable. Please try again.");
     } finally {
       setLoading(false);
     }
   }
-
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Secure Chat</h1>
