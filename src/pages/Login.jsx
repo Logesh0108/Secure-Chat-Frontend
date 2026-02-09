@@ -10,7 +10,9 @@ export default function Login() {
   const API_BASE = process.env.REACT_APP_API_URL;
 
   async function sendOtp() {
-    if (!email) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       alert("Please enter your email");
       return;
     }
@@ -25,28 +27,31 @@ export default function Login() {
     try {
       const res = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.detail || "Failed to send OTP");
+        alert(data?.detail || "Failed to send OTP");
         return;
       }
 
       // ✅ OTP sent successfully
-      localStorage.setItem("user", email);
+      localStorage.setItem("user", trimmedEmail);
       navigate("/verify");
 
     } catch (error) {
-      console.error(error);
+      console.error("OTP Error:", error);
       alert("Server not reachable. Please try again.");
     } finally {
       setLoading(false);
     }
   }
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Secure Chat</h1>
@@ -57,6 +62,7 @@ export default function Login() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         style={styles.input}
+        disabled={loading}
       />
 
       <button
@@ -88,6 +94,7 @@ const styles = {
   title: {
     color: "#ff9800",
     fontSize: "32px",
+    marginBottom: "10px",
   },
   input: {
     width: "260px",
@@ -96,6 +103,7 @@ const styles = {
     border: "1px solid #333",
     backgroundColor: "#121212",
     color: "white",
+    outline: "none",
   },
   button: {
     backgroundColor: "#ff9800",
