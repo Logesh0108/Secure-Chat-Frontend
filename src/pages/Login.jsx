@@ -6,51 +6,49 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Backend URL from Render environment variable
   const API_BASE = process.env.REACT_APP_API_URL;
 
- async function verifyOtp() {
-  const email = localStorage.getItem("user");
+  async function sendOtp() {
+    const trimmedEmail = email.trim();
 
-  if (!email || !otp) {
-    alert("Missing email or OTP");
-    return;
-  }
+    if (!trimmedEmail) {
+      alert("Please enter your email");
+      return;
+    }
 
-  if (!process.env.REACT_APP_API_URL) {
-    alert("Backend URL not configured");
-    return;
-  }
+    if (!API_BASE) {
+      alert("Backend URL not configured");
+      return;
+    }
 
-  try {
-    const res = await fetch(
-      `${process.env.REACT_APP_API_URL}/verify-otp`,
-      {
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email: email,
-          otp: otp.trim(),
-        }),
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.detail || "Failed to send OTP");
+        return;
       }
-    );
 
-    const data = await res.json().catch(() => ({}));
+      localStorage.setItem("user", trimmedEmail);
+      navigate("/verify");
 
-    if (!res.ok) {
-      alert(data.detail || "Invalid OTP");
-      return;
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      alert("Server not reachable");
+    } finally {
+      setLoading(false);
     }
-
-    alert("OTP verified successfully ✅");
-    // navigate to chat page here
-  } catch (err) {
-    console.error("Verify OTP error:", err);
-    alert("Server not reachable");
   }
-}
 
   return (
     <div style={styles.container}>
@@ -94,7 +92,6 @@ const styles = {
   title: {
     color: "#ff9800",
     fontSize: "32px",
-    marginBottom: "10px",
   },
   input: {
     width: "260px",
@@ -103,7 +100,6 @@ const styles = {
     border: "1px solid #333",
     backgroundColor: "#121212",
     color: "white",
-    outline: "none",
   },
   button: {
     backgroundColor: "#ff9800",
