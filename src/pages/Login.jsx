@@ -6,7 +6,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Backend URL from environment variable
+  // ✅ Backend URL from Render environment variable
   const API_BASE = process.env.REACT_APP_API_URL;
 
   async function sendOtp() {
@@ -33,7 +33,7 @@ export default function Login() {
         body: JSON.stringify({ email: trimmedEmail }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         alert(data?.detail || "Failed to send OTP");
