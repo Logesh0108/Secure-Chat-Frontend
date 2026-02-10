@@ -9,48 +9,48 @@ export default function Login() {
   // ✅ Backend URL from Render environment variable
   const API_BASE = process.env.REACT_APP_API_URL;
 
-  async function sendOtp() {
-    const trimmedEmail = email.trim();
+ async function verifyOtp() {
+  const email = localStorage.getItem("user");
 
-    if (!trimmedEmail) {
-      alert("Please enter your email");
-      return;
-    }
+  if (!email || !otp) {
+    alert("Missing email or OTP");
+    return;
+  }
 
-    if (!API_BASE) {
-      alert("Backend URL not configured");
-      return;
-    }
+  if (!process.env.REACT_APP_API_URL) {
+    alert("Backend URL not configured");
+    return;
+  }
 
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API_BASE}/send-otp`, {
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/verify-otp`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: trimmedEmail }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        alert(data?.detail || "Failed to send OTP");
-        return;
+        body: JSON.stringify({
+          email: email,
+          otp: otp.trim(),
+        }),
       }
+    );
 
-      // ✅ OTP sent successfully
-      localStorage.setItem("user", trimmedEmail);
-      navigate("/verify");
+    const data = await res.json().catch(() => ({}));
 
-    } catch (error) {
-      console.error("OTP Error:", error);
-      alert("Server not reachable. Please try again.");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      alert(data.detail || "Invalid OTP");
+      return;
     }
+
+    alert("OTP verified successfully ✅");
+    // navigate to chat page here
+  } catch (err) {
+    console.error("Verify OTP error:", err);
+    alert("Server not reachable");
   }
+}
 
   return (
     <div style={styles.container}>
