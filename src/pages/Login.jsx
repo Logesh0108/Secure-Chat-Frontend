@@ -8,47 +8,55 @@ export default function Login() {
 
   const API_BASE = process.env.REACT_APP_API_URL;
 
-  async function sendOtp() {
-    const trimmedEmail = email.trim();
+  async function verifyOtp() {
+  const email = localStorage.getItem("user");
 
-    if (!trimmedEmail) {
-      alert("Please enter your email");
-      return;
-    }
-
-    if (!API_BASE) {
-      alert("Backend URL not configured");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API_BASE}/send-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: trimmedEmail }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        alert(data.detail || "Failed to send OTP");
-        return;
-      }
-
-      localStorage.setItem("user", trimmedEmail);
-      navigate("/verify");
-
-    } catch (error) {
-      console.error("Send OTP error:", error);
-      alert("Server not reachable");
-    } finally {
-      setLoading(false);
-    }
+  if (!email) {
+    alert("Email not found. Please login again.");
+    return;
   }
+
+  if (!otp || otp.trim().length !== 6) {
+    alert("Please enter a valid 6-digit OTP");
+    return;
+  }
+
+  const API_BASE = process.env.REACT_APP_API_URL;
+
+  if (!API_BASE) {
+    alert("Backend URL not configured");
+    console.error("REACT_APP_API_URL is undefined");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/verify-otp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        otp: otp.trim(),
+      }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      alert(data.detail || "OTP verification failed");
+      return;
+    }
+
+    alert("OTP verified successfully ✅");
+    // navigate("/chat");
+
+  } catch (err) {
+    console.error("Verify OTP fetch error:", err);
+    alert("Network error. Backend not reachable.");
+  }
+}
+
 
   return (
     <div style={styles.container}>
